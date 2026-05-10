@@ -1,0 +1,78 @@
+name: Salesforce Deploy Sandbox
+
+on:
+  push:
+    branches: ["develop"]
+  workflow_dispatch:
+    inputs:
+      deploy_changes:
+        description: "Executar deploy real (sem dry-run)?"
+        required: true
+        type: boolean
+        default: false
+      test_level:
+        description: "Nivel de testes Apex"
+        required: true
+        type: choice
+        default: RunLocalTests
+        options:
+          - RunLocalTests
+          - NoTestRun
+
+concurrency:
+  group: salesforce-deploy-sandbox
+  cancel-in-progress: false
+
+jobs:
+  validate-or-deploy:
+    runs-on: ubuntu-latest
+    environment: sandbox
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Salesforce CLI
+        run: npm install --global @salesforce/cli
+
+      - name: Validate required secret
+        run: |
+          if [ -z "${{ secrets.SF_SFDX_AUTH_URL_SANDBOX }}" ]; then
+            echo "Secret SF_SFDX_AUTH_URL_SANDBOX nao configurado."
+            exit 1
+          fi
+
+      - name: Authenticate sandbox org
+        run: |
+          echo "${{ secrets.SF_SFDX_AUTH_URL_SANDBOX }}" > ./SFDX_AUTH_URL.txt
+          sf org login sfdx-url --sfdx-url-file ./SFDX_AUTH_URL.txt --alias sandbox --set-default
+          rm ./SFDX_AUTH_URL.txt
+
+      - name: Check-only deploy on develop push
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          sf project deploy start \
+            --target-org sandbox \
+            --source-dir force-app \
+            --dry-run \
+            --test-level RunLocalTests \
+            --wait 60
+
+      - name: Manual deploy to sandbox
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_changes == true }}
+        run: |
+          sf project deploy start \
+            --target-org sandbox \
+            --source-dir force-app \
+            --test-level "${{ inputs.test_level }}" \
+            --wait 60
+
+      - name: Manual validation only
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_changes == false }}
+        run: |
+          sf project deploy start \
+            --target-org sandbox \
+            --source-dir force-app \
+            --dry-run \
+            --test-level "${{ inputs.test_level }}" \
+            --wait 60

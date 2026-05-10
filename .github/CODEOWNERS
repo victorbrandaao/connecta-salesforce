@@ -1,0 +1,13 @@
+# Revisao de codigo por area
+
+# Default owner
+* @victorbrandaao
+
+# Salesforce metadata
+/force-app/ @victorbrandaao
+
+# CI/CD and repo config
+/.github/ @victorbrandaao
+
+# Landing page
+/b2b-landing-page/ @victorbrandaao
