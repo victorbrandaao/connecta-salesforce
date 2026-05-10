@@ -4,12 +4,15 @@
     <active>true</active>
     <description
   >Garante telefone no padrão (XX)XXXXXXXXX para a Connecta Solutions.</description>
-    <errorConditionFormula>NOT(
-REGEX(
-Phone,
-&quot;^\\([0-9]{2}\\)[0-9]{9}$&quot;
-)
-)</errorConditionFormula>
+    <errorConditionFormula>AND(
+    NOT(ISBLANK(Phone)),
+    NOT(
+      OR(
+        REGEX(Phone, &quot;^\\([0-9]{2}\\)[0-9]{9}$&quot;),
+        REGEX(Phone, &quot;^\\([0-9]{2}\\) [0-9]{4,5}-[0-9]{4}$&quot;)
+      )
+    )
+  )</errorConditionFormula>
     <errorDisplayField>Phone</errorDisplayField>
     <errorMessage
   >Para manter a qualidade da Connecta, use o formato: (XX)XXXXXXXXX</errorMessage>

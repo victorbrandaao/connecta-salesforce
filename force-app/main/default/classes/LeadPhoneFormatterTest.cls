@@ -5,7 +5,7 @@ private class LeadPhoneFormatterTest {
     Lead lead = new Lead(
       LastName = 'Teste',
       Company = 'Acme',
-      Phone = '11987654321'
+      Phone = '(11) 98765-4321'
     );
 
     insert lead;
@@ -19,7 +19,7 @@ private class LeadPhoneFormatterTest {
     Lead lead = new Lead(
       LastName = 'Teste',
       Company = 'Acme',
-      Phone = '1134567890'
+      Phone = '(11) 3456-7890'
     );
 
     insert lead;
